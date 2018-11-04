@@ -4,7 +4,9 @@ import javafx.event.EventTarget
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
+import javafx.scene.shape.StrokeLineCap
+import javafx.scene.shape.StrokeLineJoin
+import javafx.scene.shape.StrokeType
 import tornadofx.*
 
 class MyApp : App(MyView::class, MyStyle::class) {
@@ -13,15 +15,20 @@ class MyApp : App(MyView::class, MyStyle::class) {
     }
 }
 
+
 fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
+    var anifin = true
+    var stillIn = false
     return stackpane {
-        opacity = 1.0
         val reccy = rectangle {
+            strokeWidth = 2.0
+            stroke = Color.DARKCYAN
+            strokeType = StrokeType.INSIDE
+            strokeLineJoin = StrokeLineJoin.ROUND
+            strokeLineCap = StrokeLineCap.ROUND
             arcHeight = 20.0
             arcWidth = 20.0
-            stroke = Color.BLACK
-            fill = Color.DARKBLUE
-//            opacity = 1.0
+            fill = Color.ALICEBLUE
             effect = DropShadow()
             width = 250.0
             height = 40.0
@@ -30,12 +37,35 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
         val texty = text {
             text = labey
         }
+
+        setOnMouseEntered {
+            if (anifin && !stillIn) {
+                anifin = false
+                reccy.animateFill(
+                    150.millis,
+                    Color.LIGHTSKYBLUE,
+                    reccy.fill as Color,
+                    Interpolator.EASE_IN,
+                    op = {
+                        onFinished = EventHandler { anifin = true }
+                        isAutoReverse = true
+                    }
+                )
+            }
+        }
+
+        setOnMouseExited {
+            stillIn = false
+        }
+
+
         onMousePressed = EventHandler {
             isDisable = true
+            reccy.fill = Color.ALICEBLUE
             onclick()
             this@stackpane.opacityProperty().animate(
                 endValue = 0.1,
-                duration = 100.millis,
+                duration = 200.millis,
                 op = {
                     isAutoReverse = true
                     cycleCount = 2
@@ -44,16 +74,19 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
             )
             reccy.animateFill(
                 500.millis,
-                Color.GREEN,
+                Color.LIGHTBLUE,
                 reccy.fill as Color,
                 Interpolator.EASE_IN,
                 op = {
-                    onFinished = EventHandler { isDisable = false }
+                    onFinished = EventHandler {
+                        isDisable = false
+                        stillIn = true
+                    }
                 }
             )
             reccy.rotateProperty().animate(
-                endValue = 30,
-                duration = 25.millis,
+                endValue = 3,
+                duration = 40.millis,
                 op = {
                     isAutoReverse = true
                     cycleCount = 4
@@ -61,40 +94,40 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
                 interpolator = Interpolator.EASE_BOTH
             )
             texty.rotateProperty().animate(
-                endValue = 30,
-                duration = 25.millis,
+                endValue = 3,
+                duration = 40.millis,
                 op = {
                     isAutoReverse = true
-                    cycleCount = 4
+                    cycleCount = 2
                 },
                 interpolator = Interpolator.EASE_BOTH
             )
 
             this@stackpane.scaleXProperty().animate(
-                endValue = 1.1,
-                duration = 100.millis,
+                endValue = 1.05,
+                duration = 200.millis,
                 op = {
                     isAutoReverse = true
-                    cycleCount = 4
+                    cycleCount = 2
 
-                }
+                },
+                interpolator = Interpolator.EASE_BOTH
             )
 
             this@stackpane.scaleYProperty().animate(
                 endValue = 1.1,
-                duration = 100.millis,
+                duration = 200.millis,
                 op = {
                     isAutoReverse = true
-                    cycleCount = 4
-                }
+                    cycleCount = 2
+                },
+                interpolator = Interpolator.EASE_BOTH
             )
         }
     }
 }
 
-
 class MyView : View() {
-
     override val root = hbox {
         minWidth = 100.0
         minHeight = 600.0
