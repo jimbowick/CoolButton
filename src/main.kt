@@ -1,24 +1,11 @@
 import javafx.animation.Interpolator
-import javafx.animation.KeyFrame
-import javafx.animation.KeyValue
-import javafx.animation.Timeline
-import javafx.event.EventDispatchChain
 import javafx.event.EventHandler
 import javafx.event.EventTarget
-import javafx.scene.Parent
-import javafx.scene.control.Button
-import javafx.scene.control.Control
-import javafx.util.Duration
-import javafx.scene.control.TextField
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
-import javafx.scene.shape.Rectangle
-import javafx.scene.shape.Shape
-import javafx.scene.text.Text
+import javafx.scene.paint.Paint
 import tornadofx.*
-import java.util.*
 
 class MyApp : App(MyView::class, MyStyle::class) {
     init {
@@ -26,13 +13,15 @@ class MyApp : App(MyView::class, MyStyle::class) {
     }
 }
 
-fun EventTarget.coolbut(labey: String,onclick:()->Unit={}): StackPane {
+fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
     return stackpane {
+        opacity = 1.0
         val reccy = rectangle {
             arcHeight = 20.0
             arcWidth = 20.0
-            stroke = Color.YELLOW
-            fill = Color.BEIGE
+            stroke = Color.BLACK
+            fill = Color.DARKBLUE
+//            opacity = 1.0
             effect = DropShadow()
             width = 250.0
             height = 40.0
@@ -42,11 +31,17 @@ fun EventTarget.coolbut(labey: String,onclick:()->Unit={}): StackPane {
             text = labey
         }
         onMousePressed = EventHandler {
-
             isDisable = true
-
             onclick()
-
+            this@stackpane.opacityProperty().animate(
+                endValue = 0.1,
+                duration = 100.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 2
+                },
+                interpolator = Interpolator.EASE_BOTH
+            )
             reccy.animateFill(
                 500.millis,
                 Color.GREEN,
@@ -101,10 +96,19 @@ fun EventTarget.coolbut(labey: String,onclick:()->Unit={}): StackPane {
 class MyView : View() {
 
     override val root = hbox {
+        minWidth = 100.0
+        minHeight = 600.0
         vbox {
             hbox {
                 imageview("knightman.png")
-                text("This is where the stats will appear")
+                hbox {
+                    text("This is where the stats will appear")
+                    style {
+                        backgroundColor += Color.YELLOW
+                        opacity = 0.5
+                    }
+                }
+
             }
             vbox {
                 spacing = 20.0
@@ -113,7 +117,7 @@ class MyView : View() {
                 coolbut("the original coolbut")
             }
         }
-        coolbut("Button3",{print("we are best")})
+        coolbut("Button3", { print("we are best") })
     }
 }
 
