@@ -7,6 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.StrokeLineCap
 import javafx.scene.shape.StrokeLineJoin
 import javafx.scene.shape.StrokeType
+import javafx.scene.text.Font
 import tornadofx.*
 
 class MyApp : App(MyView::class, MyStyle::class) {
@@ -16,8 +17,7 @@ class MyApp : App(MyView::class, MyStyle::class) {
 }
 
 
-fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
-    var anifin = true
+fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane {
     var stillIn = false
     return stackpane {
         val reccy = rectangle {
@@ -34,37 +34,66 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
             height = 40.0
 
         }
-        val texty = text {
-            text = labey
-        }
+        val texty = text(coolString)
 
-        setOnMouseEntered {
-            if (anifin && !stillIn) {
-                anifin = false
+        this@stackpane.setOnMouseEntered {
+            if (!stillIn) {
+
                 reccy.animateFill(
-                    150.millis,
-                    Color.LIGHTSKYBLUE,
-                    reccy.fill as Color,
-                    Interpolator.EASE_IN,
+                    time = 150.millis,
+                    from = reccy.fill as Color,
+                    to = Color.LIGHTSKYBLUE,
+
                     op = {
-                        onFinished = EventHandler { anifin = true }
-                        isAutoReverse = true
+
+                        isAutoReverse = false
+                        cycleCount = 0
                     }
+                )
+                reccy.rotateProperty().animate(
+                    endValue = 2,
+                    duration = 20.millis,
+                    op = {
+                        isAutoReverse = true
+                        cycleCount = 2
+                    },
+                    interpolator = Interpolator.EASE_BOTH
+                )
+                texty.rotateProperty().animate(
+                    endValue = 1,
+                    duration = 20.millis,
+                    op = {
+                        isAutoReverse = true
+                        cycleCount = 2
+                    },
+                    interpolator = Interpolator.EASE_BOTH
                 )
             }
         }
 
-        setOnMouseExited {
+        this@stackpane.setOnMouseExited {
+            reccy.animateFill(
+                150.millis,
+                Color.SKYBLUE,
+                Color.ALICEBLUE,
+                op = {
+                    cycleCount = 1
+                    isAutoReverse = false
+
+
+                }
+            )
             stillIn = false
         }
 
 
         onMousePressed = EventHandler {
             isDisable = true
+            stillIn = true
             reccy.fill = Color.ALICEBLUE
             onclick()
             this@stackpane.opacityProperty().animate(
-                endValue = 0.1,
+                endValue = 0.8,
                 duration = 200.millis,
                 op = {
                     isAutoReverse = true
@@ -73,14 +102,13 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
                 interpolator = Interpolator.EASE_BOTH
             )
             reccy.animateFill(
-                500.millis,
-                Color.LIGHTBLUE,
+                200.millis,
+                Color.LIGHTSKYBLUE,
                 reccy.fill as Color,
                 Interpolator.EASE_IN,
                 op = {
                     onFinished = EventHandler {
                         isDisable = false
-                        stillIn = true
                     }
                 }
             )
@@ -104,8 +132,8 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
             )
 
             this@stackpane.scaleXProperty().animate(
-                endValue = 1.05,
-                duration = 200.millis,
+                endValue = 0.9,
+                duration = 150.millis,
                 op = {
                     isAutoReverse = true
                     cycleCount = 2
@@ -115,8 +143,8 @@ fun EventTarget.coolbut(labey: String, onclick: () -> Unit = {}): StackPane {
             )
 
             this@stackpane.scaleYProperty().animate(
-                endValue = 1.1,
-                duration = 200.millis,
+                endValue = 0.9,
+                duration = 150.millis,
                 op = {
                     isAutoReverse = true
                     cycleCount = 2
@@ -135,7 +163,9 @@ class MyView : View() {
             hbox {
                 imageview("knightman.png")
                 hbox {
-                    text("This is where the stats will appear")
+                    text("This is where the stats will appear") {
+                        font = Font.font("Gabriola", 20.0)
+                    }
                     style {
                         backgroundColor += Color.YELLOW
                         opacity = 0.5
@@ -150,7 +180,12 @@ class MyView : View() {
                 coolbut("the original coolbut")
             }
         }
-        coolbut("Button3", { print("we are best") })
+        coolbut(
+            coolString = "Button3",
+            onclick = {
+                print("we are best")
+            }
+        )
     }
 }
 
