@@ -1,13 +1,14 @@
-import javafx.animation.Interpolator
 import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
+import javafx.scene.shape.Rectangle
 import javafx.scene.shape.StrokeLineCap
 import javafx.scene.shape.StrokeLineJoin
 import javafx.scene.shape.StrokeType
 import javafx.scene.text.Font
+import javafx.scene.text.Text
 import tornadofx.*
 
 class MyApp : App(MyView::class, MyStyle::class) {
@@ -17,11 +18,11 @@ class MyApp : App(MyView::class, MyStyle::class) {
 }
 
 fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane {
-    var stillIn = false
     var animating = false
-    var wobbling = false
-    return stackpane {
-        val reccy = rectangle {
+    lateinit var reccy: Rectangle
+    lateinit var texty: Text
+    val stackypane = stackpane {
+        reccy = rectangle {
             strokeWidth = 2.0
             stroke = Color.DARKCYAN
             strokeType = StrokeType.INSIDE
@@ -34,117 +35,86 @@ fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane
             width = 250.0
             height = 40.0
         }
-
-        val texty = text(coolString)
-
-        this@stackpane.setOnMouseEntered {
-            if (!stillIn && !animating && !wobbling) {
-                wobbling = true
-                reccy.animateFill(
-                    time = 50.millis,
-                    from = reccy.fill as Color,
-                    to = Color.LIGHTSKYBLUE,
-                    op = {
-                        onFinished = EventHandler {
-                            wobbling = false
-                        }
-                    }
-                )
-                reccy.rotateProperty().animate(
-                    endValue = 2,
-                    duration = 20.millis,
-                    op = {
-                        isAutoReverse = true
-                        cycleCount = 2
-                    },
-                    interpolator = Interpolator.EASE_BOTH
-                )
-                texty.rotateProperty().animate(
-                    endValue = 1,
-                    duration = 20.millis,
-                    op = {
-                        isAutoReverse = true
-                        cycleCount = 2
-                    },
-                    interpolator = Interpolator.EASE_BOTH
-                )
-            }
-        }
-
-        this@stackpane.setOnMouseExited {
-            stillIn = false
-            reccy.animateFill(
-                200.millis,
-                Color.SKYBLUE,
-                Color.ALICEBLUE,
+        texty = text(coolString)
+    }
+    stackypane.onMousePressed = EventHandler {
+        onclick()
+        if (!animating) {
+            animating = true
+            stackypane.opacityProperty().animate(
+                endValue = 0.3,
+                duration = 50.millis,
                 op = {
-                    cycleCount = 1
-                    isAutoReverse = false
+                    isAutoReverse = true
+                    cycleCount = 2
+                }
+            )
+            reccy.rotateProperty().animate(
+                endValue = 3,
+                duration = 40.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 4
+                }
+            )
+            texty.rotateProperty().animate(
+                endValue = 2,
+                duration = 40.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 4
+                }
+            )
+            stackypane.scaleXProperty().animate(
+                endValue = 0.9,
+                duration = 150.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 2
+                    onFinished = EventHandler {
+                        animating = false
+                    }
+
+                }
+            )
+            stackypane.scaleYProperty().animate(
+                endValue = 0.9,
+                duration = 150.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 2
+                }
+            )
+
+        }
+    }
+    stackypane.onHover { on ->
+        if (on) reccy.fill = Color.LIGHTBLUE
+        else reccy.fill = Color.ALICEBLUE
+        if (!animating) {
+            animating = true
+            reccy.rotateProperty().animate(
+                endValue = 2,
+                duration = 21.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 2
+                    onFinished = EventHandler {
+                        animating = false
+                    }
+                }
+            )
+            texty.rotateProperty().animate(
+                endValue = 1,
+                duration = 20.millis,
+                op = {
+                    isAutoReverse = true
+                    cycleCount = 2
                 }
             )
         }
-
-        onMousePressed = EventHandler {
-            if(!animating){
-                stillIn = true
-                onclick()
-                if(!wobbling){
-                    animating = true
-                    this@stackpane.opacityProperty().animate(
-                        endValue = 0.3,
-                        duration = 40.millis,
-                        op = {
-                            isAutoReverse = true
-                            cycleCount = 2
-                        },
-                        interpolator = Interpolator.EASE_BOTH
-                    )
-                    reccy.rotateProperty().animate(
-                        endValue = 3,
-                        duration = 40.millis,
-                        op = {
-                            isAutoReverse = true
-                            cycleCount = 4
-                        },
-                        interpolator = Interpolator.EASE_BOTH
-                    )
-                    texty.rotateProperty().animate(
-                        endValue = 3,
-                        duration = 40.millis,
-                        op = {
-                            isAutoReverse = true
-                            cycleCount = 2
-                        },
-                        interpolator = Interpolator.EASE_BOTH
-                    )
-
-                    this@stackpane.scaleXProperty().animate(
-                        endValue = 0.9,
-                        duration = 150.millis,
-                        op = {
-                            isAutoReverse = true
-                            cycleCount = 2
-                            onFinished = EventHandler{
-                                animating = false
-                            }
-
-                        },
-                        interpolator = Interpolator.EASE_BOTH
-                    )
-
-                    this@stackpane.scaleYProperty().animate(
-                        endValue = 0.9,
-                        duration = 150.millis,
-                        op = {
-                            isAutoReverse = true
-                            cycleCount = 2
-                        },
-                        interpolator = Interpolator.EASE_BOTH
-                    )
-                }
-            }
-        }
     }
+    return stackypane
 }
 
 class MyView : View() {
@@ -163,7 +133,6 @@ class MyView : View() {
                         opacity = 0.5
                     }
                 }
-
             }
             vbox {
                 spacing = 20.0
