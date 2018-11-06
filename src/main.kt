@@ -16,9 +16,10 @@ class MyApp : App(MyView::class, MyStyle::class) {
     }
 }
 
-
 fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane {
     var stillIn = false
+    var animating = false
+    var wobbling = false
     return stackpane {
         val reccy = rectangle {
             strokeWidth = 2.0
@@ -32,22 +33,21 @@ fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane
             effect = DropShadow()
             width = 250.0
             height = 40.0
-
         }
+
         val texty = text(coolString)
 
         this@stackpane.setOnMouseEntered {
-            if (!stillIn) {
-
+            if (!stillIn && !animating && !wobbling) {
+                wobbling = true
                 reccy.animateFill(
-                    time = 150.millis,
+                    time = 50.millis,
                     from = reccy.fill as Color,
                     to = Color.LIGHTSKYBLUE,
-
                     op = {
-
-                        isAutoReverse = false
-                        cycleCount = 0
+                        onFinished = EventHandler {
+                            wobbling = false
+                        }
                     }
                 )
                 reccy.rotateProperty().animate(
@@ -72,85 +72,77 @@ fun EventTarget.coolbut(coolString: String, onclick: () -> Unit = {}): StackPane
         }
 
         this@stackpane.setOnMouseExited {
+            stillIn = false
             reccy.animateFill(
-                150.millis,
+                200.millis,
                 Color.SKYBLUE,
                 Color.ALICEBLUE,
                 op = {
                     cycleCount = 1
                     isAutoReverse = false
-
-
                 }
             )
-            stillIn = false
         }
 
-
         onMousePressed = EventHandler {
-            isDisable = true
-            stillIn = true
-            reccy.fill = Color.ALICEBLUE
-            onclick()
-            this@stackpane.opacityProperty().animate(
-                endValue = 0.8,
-                duration = 200.millis,
-                op = {
-                    isAutoReverse = true
-                    cycleCount = 2
-                },
-                interpolator = Interpolator.EASE_BOTH
-            )
-            reccy.animateFill(
-                200.millis,
-                Color.LIGHTSKYBLUE,
-                reccy.fill as Color,
-                Interpolator.EASE_IN,
-                op = {
-                    onFinished = EventHandler {
-                        isDisable = false
-                    }
+            if(!animating){
+                stillIn = true
+                onclick()
+                if(!wobbling){
+                    animating = true
+                    this@stackpane.opacityProperty().animate(
+                        endValue = 0.3,
+                        duration = 40.millis,
+                        op = {
+                            isAutoReverse = true
+                            cycleCount = 2
+                        },
+                        interpolator = Interpolator.EASE_BOTH
+                    )
+                    reccy.rotateProperty().animate(
+                        endValue = 3,
+                        duration = 40.millis,
+                        op = {
+                            isAutoReverse = true
+                            cycleCount = 4
+                        },
+                        interpolator = Interpolator.EASE_BOTH
+                    )
+                    texty.rotateProperty().animate(
+                        endValue = 3,
+                        duration = 40.millis,
+                        op = {
+                            isAutoReverse = true
+                            cycleCount = 2
+                        },
+                        interpolator = Interpolator.EASE_BOTH
+                    )
+
+                    this@stackpane.scaleXProperty().animate(
+                        endValue = 0.9,
+                        duration = 150.millis,
+                        op = {
+                            isAutoReverse = true
+                            cycleCount = 2
+                            onFinished = EventHandler{
+                                animating = false
+                            }
+
+                        },
+                        interpolator = Interpolator.EASE_BOTH
+                    )
+
+                    this@stackpane.scaleYProperty().animate(
+                        endValue = 0.9,
+                        duration = 150.millis,
+                        op = {
+                            isAutoReverse = true
+                            cycleCount = 2
+                        },
+                        interpolator = Interpolator.EASE_BOTH
+                    )
                 }
-            )
-            reccy.rotateProperty().animate(
-                endValue = 3,
-                duration = 40.millis,
-                op = {
-                    isAutoReverse = true
-                    cycleCount = 4
-                },
-                interpolator = Interpolator.EASE_BOTH
-            )
-            texty.rotateProperty().animate(
-                endValue = 3,
-                duration = 40.millis,
-                op = {
-                    isAutoReverse = true
-                    cycleCount = 2
-                },
-                interpolator = Interpolator.EASE_BOTH
-            )
-
-            this@stackpane.scaleXProperty().animate(
-                endValue = 0.9,
-                duration = 150.millis,
-                op = {
-                    isAutoReverse = true
-                    cycleCount = 2
-
-                },
-                interpolator = Interpolator.EASE_BOTH
-            )
-
-            this@stackpane.scaleYProperty().animate(
-                endValue = 0.9,
-                duration = 150.millis,
-                op = {
-                    isAutoReverse = true
-                    cycleCount = 2
-                },
-                interpolator = Interpolator.EASE_BOTH
-            )
+            }
         }
     }
 }
